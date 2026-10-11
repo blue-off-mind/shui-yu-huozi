@@ -9,6 +9,11 @@
 - 点击一个字：字浮上水面、移到中央放大，笔画像墨一样洇开，露出作品画面。画框形状跟着画面走（竖图像立轴、宽图像手卷、方图像斗方）。镜头先看全貌，再逐条移到每条线索对应的位置；每条线索是一句毛笔短句点题、几行宋体注释写具体做法，旁边是技术栈与一句话简介。
 - 潜入的终点与水面场景逐像素重合，镜头和交互之间没有切换的痕迹。
 
+## 线上地址
+
+- 作品集：<https://portfolio.wuyusblog.com/>
+- 统一入口：<https://wuyusblog.com/>
+
 ## 两种水
 
 `src/content/works.js` 里的 `site.water`：
@@ -28,6 +33,14 @@ npm run preview   # 预览构建结果
 ```
 
 `dev` 和 `build` 之前会自动运行 `npm run fonts` 裁剪字体。
+
+## 部署
+
+- GitHub 仓库：`blue-off-mind/shui-yu-huozi`（私有）
+- Vercel 项目：`daily-clue-portfolio`（原星岛之谜的项目，已改为连接本仓库）
+- 生产分支：`main`
+- 推送到 `main` 后由 Vercel 自动构建并更新 `portfolio.wuyusblog.com`
+- 构建方式写在 `vercel.json`：`npm run build`（先裁剪字体再打包），输出 `dist/`；带 hash 的 `/assets/` 文件长期缓存
 
 ## 作品
 
