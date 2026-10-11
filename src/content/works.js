@@ -18,7 +18,7 @@
 // 截图：运动社交平台、企微客服 Agent 为本地部署 + 模拟数据重新截取；轨道测量 App 来自星岛之谜导出的脱敏版本。
 
 export const site = {
-  title: '水与活字',
+  title: '碧水洗字',
   author: '',
   jarLabel: '酒',
   // 坛中的水：'clear' 清水（青蓝透亮，水底有光纹与竹影）/ 'night' 夜水（近乎全黑）
