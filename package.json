@@ -1,0 +1,21 @@
+{
+  "name": "shui-yu-huozi",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "fonts": "node scripts/build-fonts.mjs",
+    "predev": "node scripts/build-fonts.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/build-fonts.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "subset-font": "^2.9.0",
+    "vite": "^8.3.4"
+  }
+}

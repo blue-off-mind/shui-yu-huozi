@@ -1,0 +1,587 @@
+/* —— 字体（由 scripts/build-fonts.mjs 按用字裁剪生成）—— */
+@font-face {
+  font-family: 'Huozi Mincho';
+  src: url('./fonts/display.woff2') format('woff2');
+  font-weight: 800;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Huozi Brush';
+  src: url('./fonts/brush.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Huozi Serif';
+  src: url('./fonts/serif.woff2') format('woff2');
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+/* —— 色与字 ——
+   墨 #000：开场的全黑
+   纸 #ebe5d6：黑底上文字的象牙白
+   黛 #0d2c3b：清水上文字的深墨蓝，毛笔字幕落在透亮的水上，像写在纸上
+   线 #f5f4f0：那条白线
+   斗方红只出现在酒坛上，不进入界面 */
+:root {
+  --void: #000;
+  --line: #f5f4f0;
+  --f-serif: 'Huozi Serif', 'Songti SC', 'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --f-brush: 'Huozi Brush', 'Kaiti SC', 'STKaiti', 'KaiTi', serif;
+  --gutter: clamp(18px, 3.2vw, 44px);
+  --ease-ink: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--void);
+  color: var(--paper);
+}
+
+/* 文字颜色以 RGB 三元组给出，各级透明度在 body 上展开，这样换场景时只需改 --fg */
+body {
+  --fg: 235 229 214;
+  --paper: rgb(var(--fg));
+  --paper-80: rgb(var(--fg) / 0.82);
+  --paper-60: rgb(var(--fg) / 0.6);
+  --paper-45: rgb(var(--fg) / 0.45);
+  --paper-30: rgb(var(--fg) / 0.3);
+  --paper-15: rgb(var(--fg) / 0.15);
+  font-family: var(--f-serif);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body.water-clear[data-scene='water'],
+body.water-clear[data-scene='focus'],
+body.water-clear[data-scene='closing'] {
+  --fg: 13 44 59;
+}
+
+p,
+h2 {
+  margin: 0;
+  font-weight: inherit;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: block;
+  touch-action: none;
+}
+
+body.is-pointer #stage {
+  cursor: pointer;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+#ui button,
+#ui a {
+  pointer-events: auto;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 1px solid var(--paper-60);
+  outline-offset: 6px;
+}
+
+/* —— 场景层的显隐 —— */
+.layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.9s var(--ease-ink),
+    visibility 0s linear 0.9s;
+}
+
+body[data-scene='jar'] .jar-layer,
+body[data-scene='water'] .water-layer,
+body[data-scene='focus'] .focus-layer {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 1.2s var(--ease-ink) 0.2s,
+    visibility 0s;
+}
+
+/* 酒坛与活字上的按钮只给键盘和读屏用：鼠标交给画布做精确命中 */
+#ui .jar-button,
+#ui .works-nav button {
+  pointer-events: none;
+}
+
+/* —— 酒坛 —— */
+.jar-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 40% 40% 30% 30%;
+}
+
+.jar-hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(9vh, 64px);
+  transform: translateX(-50%);
+  padding-left: 0.9em;
+  font-size: 13px;
+  letter-spacing: 0.9em;
+  color: var(--paper-45);
+  white-space: nowrap;
+  animation: breathe 4.8s ease-in-out infinite;
+}
+
+body.is-pointer[data-scene='jar'] .jar-hint {
+  color: var(--paper-80);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* —— 水面 —— */
+.works-nav button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 6px;
+  opacity: 0;
+}
+
+.works-nav button:focus-visible {
+  opacity: 1;
+  outline-offset: 0;
+}
+
+.hover-caption {
+  position: absolute;
+  left: 0;
+  top: 0;
+  writing-mode: vertical-rl;
+  display: flex;
+  gap: 0.7em;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-ink);
+  will-change: transform;
+}
+
+.hover-caption.is-visible {
+  opacity: 1;
+}
+
+.hover-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--paper-80);
+}
+
+.hover-stack {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--paper-45);
+}
+
+.hover-info {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--paper-45);
+}
+
+.text-button {
+  font-size: 12px;
+  letter-spacing: 0.42em;
+  padding: 10px 0 10px 0.42em;
+  color: var(--paper-45);
+  text-decoration: none;
+  transition: color 0.4s var(--ease-ink);
+}
+
+.text-button:hover {
+  color: var(--paper);
+}
+
+.back-button,
+.close-button {
+  position: absolute;
+  top: calc(var(--gutter) - 10px);
+  right: var(--gutter);
+  writing-mode: vertical-rl;
+  padding: 0 10px 0.42em;
+}
+
+.water-hint {
+  position: absolute;
+  left: var(--gutter);
+  bottom: var(--gutter);
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  line-height: 2;
+  color: var(--paper-30);
+  max-width: calc(100vw - var(--gutter) * 2);
+  transition: opacity 1.6s var(--ease-ink);
+}
+
+.water-hint.is-gone {
+  opacity: 0;
+}
+
+/* —— 作品展开 ——
+   side：画框偏左，左侧竖排题签，右侧是线索（竖排毛笔短句 + 横排宋体注释）、技术栈与简介
+   below：宽图与竖屏手机，画框在上，题签在画框上方，线索与简介在下方 */
+.focus-meta {
+  position: absolute;
+  display: flex;
+  gap: 0.8em;
+}
+
+.focus-title {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: var(--paper);
+}
+
+.focus-info {
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  color: var(--paper-45);
+}
+
+body.focus-side .focus-meta {
+  top: var(--fy);
+  right: calc(100vw - var(--fx) + 30px);
+  writing-mode: vertical-rl;
+}
+
+body.focus-below .focus-meta {
+  left: var(--fx);
+  bottom: calc(100vh - var(--fy) + 16px);
+  align-items: baseline;
+  gap: 1.4em;
+}
+
+.focus-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  pointer-events: auto;
+}
+
+body.focus-side .focus-text {
+  top: var(--fy);
+  left: calc(var(--fx) + var(--fw) + 46px);
+  right: var(--gutter);
+  height: var(--fh);
+  max-width: 30em;
+}
+
+body.focus-below .focus-text {
+  top: calc(var(--fy) + var(--fh) + 30px);
+  left: var(--fx);
+  width: var(--fw);
+  bottom: var(--gutter);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+body.focus-below .focus-text::-webkit-scrollbar {
+  display: none;
+}
+
+/* 宽屏上的手卷：线索在左，简介在右，两栏并排，不必往下翻 */
+body.focus-below:not(.is-portrait) .focus-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  grid-template-areas:
+    'clue brief'
+    'foot brief';
+  grid-template-rows: auto 1fr;
+  column-gap: 56px;
+  row-gap: 22px;
+  align-content: start;
+}
+
+body.focus-below:not(.is-portrait) .clues {
+  grid-area: clue;
+}
+
+body.focus-below:not(.is-portrait) .focus-brief {
+  grid-area: brief;
+  padding-top: 0.5em;
+}
+
+body.focus-below:not(.is-portrait) .focus-foot {
+  grid-area: foot;
+  align-self: start;
+}
+
+/* 新旧两条线索叠在同一格里交替淡入淡出，高度不跳 */
+.clues {
+  display: grid;
+}
+
+.clue {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-ink);
+}
+
+body.focus-side .clue {
+  flex-direction: row;
+  gap: 26px;
+  align-items: flex-start;
+}
+
+.clue.is-in {
+  opacity: 1;
+}
+
+.clue.is-out {
+  opacity: 0;
+  transition-duration: 0.6s;
+}
+
+.clue-brush {
+  font-family: var(--f-brush);
+  font-size: var(--brush-size, 30px);
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  color: var(--paper);
+  white-space: nowrap;
+  filter: blur(5px);
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 45%, transparent 55%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 0%, #000 45%, transparent 55%, transparent 100%);
+  -webkit-mask-size: 220% 100%;
+  mask-size: 220% 100%;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  transition:
+    filter 1.2s var(--ease-ink),
+    -webkit-mask-position 1.6s var(--ease-ink),
+    mask-position 1.6s var(--ease-ink);
+}
+
+/* 竖排时墨迹从上往下写 */
+body.focus-side .clue-brush {
+  writing-mode: vertical-rl;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 55%, transparent 100%);
+  -webkit-mask-size: 100% 220%;
+  mask-size: 100% 220%;
+  -webkit-mask-position: 0 100%;
+  mask-position: 0 100%;
+}
+
+.clue.is-in .clue-brush {
+  filter: blur(0);
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+}
+
+.clue-note {
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: 0.04em;
+  text-align: justify;
+  color: var(--paper-80);
+  max-width: 34em;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 1s var(--ease-ink) 0.45s,
+    transform 1s var(--ease-ink) 0.45s;
+}
+
+body.focus-side .clue-note {
+  padding-top: 0.3em;
+}
+
+.clue.is-in .clue-note {
+  opacity: 1;
+  transform: none;
+}
+
+.focus-brief {
+  font-size: 12.5px;
+  line-height: 1.9;
+  letter-spacing: 0.04em;
+  color: var(--paper-60);
+  max-width: 32em;
+  transition: opacity 0.8s var(--ease-ink);
+}
+
+body.focus-side .focus-brief {
+  margin-top: auto;
+}
+
+.focus-stack {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--paper-80);
+  margin-bottom: 0.5em;
+}
+
+.focus-foot {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.clue-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.clue-nav button {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  padding: 8px 4px 6px 8px;
+  color: var(--paper-45);
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.4s var(--ease-ink),
+    border-color 0.4s var(--ease-ink);
+}
+
+.clue-nav button:hover {
+  color: var(--paper);
+}
+
+.clue-nav button[aria-current='true'] {
+  color: var(--paper);
+  border-bottom-color: var(--paper-60);
+}
+
+.focus-actions {
+  display: flex;
+  gap: 24px;
+}
+
+.focus-actions [hidden] {
+  display: none;
+}
+
+body.is-portrait .focus-title {
+  font-size: 17px;
+  letter-spacing: 0.16em;
+}
+
+/* 竖屏：题签分两行，右边给“收起”让出位置 */
+body.is-portrait.focus-below .focus-meta {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45em;
+  right: 72px;
+  bottom: calc(100vh - var(--fy) + 14px);
+}
+
+body.is-portrait .clue-note {
+  font-size: 13.5px;
+  line-height: 1.85;
+}
+
+/* —— 无法使用 WebGL 时 —— */
+.fallback {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  pointer-events: auto;
+  padding: 18vh var(--gutter);
+  max-width: 40em;
+  margin: 0 auto;
+  line-height: 2;
+}
+
+.fallback-message {
+  color: var(--paper-60);
+  font-size: 14px;
+  margin-bottom: 3em;
+}
+
+.fallback-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fallback-list li {
+  padding: 0.9em 0;
+  border-top: 1px solid var(--paper-15);
+  font-size: 15px;
+}
+
+.fallback-list p {
+  margin-top: 0.4em;
+  font-size: 13px;
+  color: var(--paper-60);
+}
+
+.fallback-list span {
+  color: var(--paper-45);
+  font-size: 12px;
+  margin-left: 1.5em;
+  letter-spacing: 0.2em;
+}
+
+.noscript {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--paper-60);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jar-hint {
+    animation: none;
+  }
+  .clue-brush {
+    filter: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
