@@ -1,3 +1,4 @@
+import "./vercel-insights.js";
 import './styles.css'
 import * as THREE from 'three'
 import { site, works } from './content/works.js'
